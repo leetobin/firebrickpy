@@ -1,0 +1,5 @@
+config BR2_PACKAGE_PYTHON_EPYDOC
+	bool "python-epydoc"
+	depends on BR2_PACKAGE_PYTHON
+	help
+	  python-epydoc package

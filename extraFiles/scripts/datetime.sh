@@ -6,30 +6,21 @@
 newdate=''
 newtime=''
 while [ "$key" != "3" ]; do
-	lcd c
-	lcd g 0 0 ; lcd p "1. Set Date"
-	lcd g 0 1 ; lcd p "2. Set Time" 
-	lcd g 0 2 ; lcd p "3. Back"
-	lcd g 0 3 ; lcd p "$(date +\(%H:%M\)%Y-%m-%d)"
+	clearDisplay
+	displayStrings "1. Set Date" "2. Set Time" "3. Back" "$(date +\(%H:%M\)%Y-%m-%d)"
 	stty raw; read -n 1 key; stty -raw
-	lcd c
+	clearDisplay
 	case "$key" in
 		1)
-			lcd c
-			lcd g 0 0 ; lcd p "$(date +\"%Y-%m-%d\")"
-			lcd g 0 1 ; lcd p "Input date:"
-			lcd g 0 2 ; lcd p "YYYY-MM-DD"
-			lcd g 0 3
-			 newdate=$(lcd i)
-                        date -s "$newdate $(date +%H:%M:%S)"
+			clearDisplay
+			displayStrings "$(date +\"%Y-%m-%d\")" "Input date:" "YYYY-MM-DD" ""
+			newdate=$(readString)
+         date -s "$newdate $(date +%H:%M:%S)"
 			;;
 		2) 	
-			lcd c
-			lcd g 0 0 ; lcd p "$(date +\"%H:%M:%S\")"
-			lcd g 0 1 ; lcd p "Input time:"
-			lcd g 0 2 ; lcd p "HH:MM:SS"
-			lcd g 0 3
-			newtime=$(lcd i)
+			clearDisplay
+			displayStrings "$(date +\"%H:%M:%S\")" "Input time:" "HH:MM:SS" ""
+			newtime=$(readString)
 			date -s "$(date +%Y-%m-%d) $newtime"
 			;;
 		*)

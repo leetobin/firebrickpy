@@ -1,0 +1,5 @@
+config BR2_PACKAGE_HOST_PYTHON_IPADDR
+	bool "host python-ipaddr"
+	depends on BR2_PACKAGE_PYTHON
+	help
+	  python-ipaddr package

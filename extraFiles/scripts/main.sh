@@ -4,26 +4,22 @@
 # last edit 17/06/2013 - Lee Tobin
 
 while [ "$key" != "4" ]; do
-	lcd c
-	lcd g 0 0 ; lcd p "1.Set Date/Time"
-	lcd g 0 1 ; lcd p "2.Storage"
-	lcd g 0 2 ; lcd p "3.Imaging/Writeblock" 
-	lcd g 0 3 ; lcd p "4.Power Down" 
-
+	clearDisplay
+	displayStrings "1. Set Date/Time" "2. Storage" "3. Imaging/Writeblock" "4. Power Down" 
 	stty raw; read -n 1 key; stty -raw
-	lcd c
+	clearDisplay
 	case "$key" in
 		1)
-			sh datetime.sh 
+			source ./datetime.sh 
 			;;
 		2) 	
-			sh storage.sh 
+			source ./storage.sh 
 			;;
 		3)
-			sh evidence.sh 
+			source ./evidence.sh 
 			;;
 		4)
-			lcd c
+			clearDisplay
 			poweroff
 			sleep 10
 			;;

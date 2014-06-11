@@ -5,11 +5,21 @@
 
 #export evidential drive
 
+source ./config.sh
+source ./evidenceImage.sh
+if [ "$IMAGING_TOOL_SUITE" = "dcfldd" ]; then
+	source ./dcflddEvidenceVerify.sh 
+elif [ "$IMAGING_TOOL_SUITE" = "ewfacquire" ]; then
+	source ./ewflibEvidenceVerify.sh
+else
+	echo "IMAGING_TOOL_SUITE configuration paramater is not set or has invalid value"
+fi
+
 if ls -la /sys/block | grep ata. | grep host0 | grep -qo sd.
 then
 	export evidenceDisk=$(ls -la /sys/block | grep ata. | grep host0 | grep -o sd. | tail -1)
 	#Export the evidence drive
-	sh evidenceExport.sh
+	#sh evidenceExport.sh
 	#If there is storage then bring up the imaging menu, else just export over FW
 	if [[ ${#storageDevice} -gt 2 ]] ; then
 	
@@ -37,7 +47,7 @@ then
 		
 		trap 'echo "ignoring"' INT
 
-		lcd c
+		clearDisplay
 
 		#check there is enough space on storage for evidence
 		#check that there is enough internal storage for image
@@ -53,10 +63,8 @@ then
 		
 			while [ 1 == 1 ]
 			do
-				lcd g 0 0 ; lcd p "1. Image & verify"
-				lcd g 0 1 ; lcd p "2. Power off"
-				lcd g 0 3 ; lcd p "Free:"
-				df -h | grep firestor | tr -s " " | cut -d ' ' -f 4 | tr -d $"\n" | lcd j 6 3
+				freespace=$(df -h | grep firestor | tr -s " " | cut -d ' ' -f 4 | tr -d $"\n")
+				displayStrings "1. Image & verify" "2. Power off" "" "Free:" "$freespace"
 
 				stty raw; read -n 1 key ; stty -raw
 				case $key in
@@ -65,53 +73,51 @@ then
 					#check that the ID is unique on storage disk
 					while [ "$evidenceID" == "" ]
 					do
-					lcd c
-					lcd g 0 1 ; lcd p "Enter Evidence ID:"
-                    lcd g 0 2
+						clearDisplay
+						displayStrings "Enter Evidence ID:" ""
+						evidenceID=$(readString | tr -d "?*/\\><|")
+						destDir="/firestor/$evidenceID"      
 
-					evidenceID=$(lcd i | tr -d "?*/\\><|")
-
-
-					destDir="/firestor/$evidenceID"      
-					if test -d destDir 
-					then
-					  lcd c
-					  lcd g 0 1 ; lcd p "Evidence ID Exists!"
-					  sleep 2
-					  evidenceID=''
-					fi
+						if test -d destDir 
+						then
+							clearDisplay
+					  		displayStrings "Evidence ID Exists!"
+					  		sleep 2
+					  		evidenceID=''
+						fi
 					done
 
 					mkdir $destDir
 
-					imghash=$(./evidenceImage.sh /dev/$evidenceDisk $destDir $evidenceID)
-					exitCode=$?
-
-					if [ $exitCode != 0 ]
-					then
-					lcd c 
-					lcd g 0 1 ; lcd p "Imaging Failed"
-					lcd g 0 2 ; lcd p "Deleting image"
-					rm -r $destDir/*
-					rmdir $destDir
+					exitCode=$(performEvidenceImage $evidenceDisk $destDir $evidenceID)
+					if [[ "$exitCode" == "ERROR" ]]; then
+						clearDisplay
+						displayStrings "Imaging Failed" "Deleting image"
+						rm -r $destDir/*
+						rmdir $destDir
 					else
-					./evidenceVerify.sh $destDir $evidenceID $imghash
-					exitCode=$?
-					if [ $exitCode != 0 ]
-					then
-					   lcd c 
-					   lcd g 0 1 ; lcd p "Verification falied"
-					   lcd g 0 2 ; lcd p "Deleting image"
-					   rm -r $destDir/*
-					   rmdir $destDir
-					else
-					   lcd c
-					   lcd g 0 1 ; lcd p "Verification Success"
-					   sleep 1
-					fi    
+							clearDisplay
+							displayStrings "Verifying image"
+							if [ "$IMAGING_TOOL_SUITE" = "ewfacquire" ]; then
+								echo "Verification with ewfsuite disabled because "
+								echo "1. ewfverify runs out of memory on FIREBrick, and"
+								echo "2. EnCase will verify the image when it is added to a case"
+							else 
+								exitCode=$(verifyImage $destDir $evidenceID)
+								echo "Verification exit code is -->$exitCode<--"
+								if [[ "$exitCode" == "ERROR" ]]; then
+									clearDisplay
+									displayStrings "Verification falied" "Deleting image"
+					   			rm -r $destDir/*
+					   			rmdir $destDir
+								else
+									clearDisplay
+					   			displayStrings "Verification Success"
+					   			sleep 1
+								fi    
+							fi
 					fi
-
-					lcd c
+					clearDisplay
 					;;
 
 				2)
@@ -119,7 +125,7 @@ then
 					sleep 10
 					;;
 				s)
-					lcd c
+					clearDisplay
 					exit
 					;;
 				*)
@@ -127,30 +133,24 @@ then
 				esac
 			done
 		else
-			lcd c
-			lcd g 0 0 ; lcd p "Insufficient"
-			lcd g 0 1 ; lcd p "storage available"
-			lcd g 0 2 ; lcd p "Press any key"
-			lcd g 0 3 ; lcd p "to poweroff..."
+			clearDisplay
+			displayStrings "Insufficient" "storage available" "Press any key" "to poweroff..."
 			stty raw; read -n 1 key; stty -raw
-			lcd c
+			clearDisplay
 			poweroff
 			sleep 10
 		fi
 	else
-		lcd c
-		lcd g 0 0 ; lcd p "Evidence exported"
-		lcd g 0 1 ; lcd p "Press any key"
-		lcd g 0 2 ; lcd p "to poweroff..."
+		clearDisplay
+		displayStrings "Evidence exported" "Press any key" "to poweroff..."
 		stty raw; read -n 1 key; stty -raw
-		lcd c
+		clearDisplay
 		poweroff
 		sleep 10
 	fi
 
 else
-	lcd c
-	lcd g 0 0 ; lcd p "  Evidence drive"
-	lcd g 0 1 ; lcd p "  not found!!"
+	clearDisplay
+	displayStrings "  Evidence drive" "  not found!!"
 	sleep 2
 fi

@@ -1,0 +1,10 @@
+config BR2_PACKAGE_PYTHON_RTSLIB
+	bool "python-rtslib"
+	depends on BR2_PACKAGE_PYTHON
+	depends on BR2_PACKAGE_PYTHON_IPADDR
+	depends on BR2_PACKAGE_PYTHON_NETIFACES
+	depends on BR2_PACKAGE_PYTHON_EPYDOC
+	depends on BR2_PACKAGE_PYTHON_PYPARSING
+	depends on BR2_PACKAGE_PYTHON_CONFIGOBJ
+	help
+	  RTSLib for LIO support

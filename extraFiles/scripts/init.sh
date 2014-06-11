@@ -2,9 +2,17 @@
 #
 # Firebrick main script
 # last edit 17/06/2013 - Lee Tobin
+# 24/05/2014 DaveOR: 
+#     - Added importing of configuration values from config file
+#     - Added importing of display functions from output.sh
+
+# Read configuration values from config file
+source ./config.sh
+
+# Read output support functions
+source ./io.sh
 
 #--- Check the LCD device nodes
-
 #Get LCD location on USB bus
 lcdnodeinfo=$(lsusb | grep 0403:c630)
 #Tokenise on spaces
@@ -42,8 +50,8 @@ if [ ! -e $lcdnode ] ; then
 
 		#make the device node
 		mknod $lcdnode c $majnum $minnum
-		
-		lcd c
+	
+		clearDisplay	
 		lcd o 190
 		
 		cd /scripts
@@ -69,4 +77,4 @@ fi
 echo Storage found on:$storageDevice
 
 #Call the main script
-sh main.sh 
+source ./main.sh 
