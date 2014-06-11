@@ -13,7 +13,7 @@ initSingleDiskStorage() {
 	if [ "$ans" == "YES" ] ; then 
 		clearDisplay
 		if [ "$ZERO_STORAGE_DRIVE_ON_INITIALISE" == "true" ]; then
-			displayStrings "Zeroing Storage..."
+			displayStrings "Zeroing Storage... (This might take a long time)"
 			dd if=/dev/zero of=${storageDisk} bs=1M
 		fi		
 		displayStrings "Initialising Storage..." 

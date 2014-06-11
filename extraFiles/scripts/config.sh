@@ -62,5 +62,5 @@ export ISCSI_INITIATOR_WWN=iqn.1993-08.org.debian:01:b571818de1e2
 #    true      : Fill the storage drive with zeros
 #    false     : Do not fill the storage drive with zeros
 #
-export ZERO_STORAGE_DRIVE_ON_INITIALISE=true
+export ZERO_STORAGE_DRIVE_ON_INITIALISE=false
 
